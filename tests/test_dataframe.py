@@ -1,41 +1,41 @@
+import json
+import random
 import pandas
-import yaml
 from expr_graph import Expression, NumericExpression, DataFrameExpression
 
-dataframe_flat = (
+dataframe_flat = lambda: (
     # index
     (0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
     # data
-    [
-        (0, 9),
-        (1, 8),
-        (2, 7),
-        (3, 6),
-        (4, 5),
-        (5, 4),
-        (6, 3),
-        (7, 2),
-        (8, 1),
-        (9, 0),
-    ],
+    [(random.randint(1, 10), random.randint(1, 10)) for _ in range(10)],
     # columns
     ('a', 'b'),
 )
-index, data, columns = dataframe_flat
+index, data, columns = dataframe_flat()
 dataframe0 = pandas.DataFrame.from_records(index=index, data=data, columns=columns)
+index, data, columns = dataframe_flat()
 dataframe1 = pandas.DataFrame.from_records(index=index, data=data, columns=columns)
 expr = Expression('*',
     [
-        Expression('+',
+        Expression('-',
             [
                 DataFrameExpression(dataframe0),
-                DataFrameExpression(dataframe1)
+                Expression('+',
+                    [
+                        NumericExpression(32),
+                        DataFrameExpression(dataframe1),
+                    ]
+                )
             ]
         ),
-        NumericExpression(3)
+        Expression(operation_name='/',
+                   arguments=[NumericExpression(number=22),
+                              NumericExpression(number=7)])
     ]
 )
 resolved = expr.resolve()
 
 def test_dataframe_numeric():
-    expr.serialise(yaml.dump)  # uh oh
+    print('')
+    print(expr.resolve())
+    expr.serialise(json.dumps)
