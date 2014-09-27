@@ -1,5 +1,6 @@
+# coding: utf-8
 import json
-from exp_graph import expression_from_dict, Expression, NumericExpression
+from expr_graph import expression_from_dict, Expression, NumericExpression
 
 
 pi_100 = Expression(operation_name='*',

@@ -5,4 +5,5 @@ OPERATIONS = {
     '+': operator.add,
     '/': operator.div,
     '-': operator.sub,
+    '%': operator.mod,
 }

@@ -24,18 +24,16 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-initpy_ = os.path.join(os.path.dirname(__file__), 'exp_graph', '__init__.py')
-
-
 def dunder(name):
-    with open(initpy_) as initpy:
+    path_components = os.path.dirname(__file__), 'expr_graph', '__init__.py'
+    with open(os.path.join(*path_components)) as initpy:
         return (re.compile(r".*{0} = '(.*?)'".format(name), re.S)
                   .match(initpy.read()).group(1))
 
 setup_kwargs = {
     'author': dunder('__author__'),
     'name': 'expression graph',
-    'packages': ['exp_graph'],
+    'packages': ['expr_graph'],
     'install_requires': ['pydot'],
     'version': dunder('__version__'),
     'tests_require': ['pytest'],
