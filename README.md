@@ -2,7 +2,7 @@
 
 draw litte expression graphs
 
-![pi × 100](https://raw.githubusercontent.com/bmcorser/expr-graph/master/pi×100.png)
+![expr-graph](https://raw.githubusercontent.com/bmcorser/expr-graph/master/expr-graph.png)
 
  - represent mathematical operations as an `Expression` (or subclass) object
  - render graphs using [`pydot`](https://code.google.com/p/pydot/)
