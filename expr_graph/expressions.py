@@ -1,9 +1,11 @@
 import sys
+import uuid
 
+import pandas
 import pydot
 
 from .exceptions import MalformedExpressionException
-from .operations import OPERATIONS
+from .operations import OPERATIONS, OP_ALIAS
 
 
 def _colour(dict_):
@@ -26,10 +28,7 @@ class ExpressionBase(object):
     serialisable_attrs = ()
 
     def to_dict(self):
-        attrs = dict()
-        for attr in self.serialisable_attrs:
-            attrs.update({attr: getattr(self, attr)})
-        return attrs
+        return {attr: getattr(self, attr) for attr in self.serialisable_attrs}
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -90,14 +89,13 @@ class Expression(ExpressionBase):
 
     @property
     def node_name(self):
-        return self.operation_name
+        return OP_ALIAS.get(self.operation_name, self.operation_name)
 
     @classmethod
-    def from_dict(cls, json_dict):
+    def from_dict(cls, dict_):
         try:
-            params = {'operation_name': json_dict['operation_name']}
-            deserialised_args = map(expression_from_dict,
-                                    json_dict['arguments'])
+            params = {'operation_name': dict_['operation_name']}
+            deserialised_args = map(expression_from_dict, dict_['arguments'])
             params['arguments'] = deserialised_args
             return cls(**params)
         except KeyError:
@@ -156,10 +154,46 @@ class NumericExpression(ExpressionBase):
 
     @property
     def node_name(self):
-        return repr(self.number)
+        n = self.number
+        return repr(int(n) if int(n) == float(n) else float(n))
 
     def resolve(self):
         return self.number
 
 
-__all__ = ('expression_from_dict', 'Expression', 'NumericExpression')
+class DataFrameExpression(ExpressionBase):
+    __type__ = 'DataFrameExpression'
+    serialisable_attrs = ('__type__', 'dataframe')
+    node_opts = {'colour': '#FFDC00'}  # Yellow
+
+    def __init__(self, dataframe, node_name=False, **kwargs):
+        if not isinstance(dataframe, pandas.DataFrame):
+            messg = 'DataFrameExpression must be instantiated with a `DataFrame`.'  # NOQA
+            raise MalformedExpressionException(messg)
+        self.node_name = node_name or "df@{0}".format(hex(id(dataframe)))
+        self.dataframe = dataframe
+
+    def to_dict(self):
+        return {
+            '__type__': self.__type__,
+            'dataframe': self.dataframe.to_dict()
+        }
+
+    @classmethod
+    def from_dict(cls, dict_):
+        try:
+            return cls(pandas.DataFrame.from_dict(dict_['dataframe']))
+        except KeyError:
+            raise MalformedExpressionException('DataFrameExpression object '
+                                               'requires `dataframe` key, '
+                                               'please pass it.')
+
+    def resolve(self):
+        return self.dataframe
+
+__all__ = (
+    'expression_from_dict',
+    'Expression',
+    'NumericExpression',
+    'DataFrameExpression'
+)

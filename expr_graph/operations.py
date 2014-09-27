@@ -1,4 +1,6 @@
+# coding: utf-8
 import operator
+
 
 OPERATIONS = {
     '*': operator.mul,
@@ -7,3 +9,5 @@ OPERATIONS = {
     '-': operator.sub,
     '%': operator.mod,
 }
+
+OP_ALIAS = {'*': '×', '/': '÷'}
