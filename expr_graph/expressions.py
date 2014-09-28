@@ -166,23 +166,33 @@ class DataFrameExpression(ExpressionBase):
     serialisable_attrs = ('__type__', 'dataframe')
     node_opts = {'colour': '#FFDC00'}  # Yellow
 
-    def __init__(self, dataframe, node_name=False, **kwargs):
+    def __init__(self, dataframe, name='auto', **kwargs):
         if not isinstance(dataframe, pandas.DataFrame):
             messg = 'DataFrameExpression must be instantiated with a `DataFrame`.'  # NOQA
             raise MalformedExpressionException(messg)
-        self.node_name = node_name or "df@{0}".format(hex(id(dataframe)))
         self.dataframe = dataframe
+        self.name = name
+
+    @property
+    def node_name(self):
+        if self.name is 'auto':
+            return "df@{0}".format(hex(id(self.dataframe)))
+        return repr(self.name)
 
     def to_dict(self):
         return {
             '__type__': self.__type__,
-            'dataframe': self.dataframe.to_dict()
+            'dataframe': self.dataframe.to_dict(),
+            'name': self.name,
         }
 
     @classmethod
     def from_dict(cls, dict_):
         try:
-            return cls(pandas.DataFrame.from_dict(dict_['dataframe']))
+            dict_.update({
+                'dataframe': pandas.DataFrame.from_dict(dict_['dataframe']),
+            })
+            return cls(**dict_)
         except KeyError:
             raise MalformedExpressionException('DataFrameExpression object '
                                                'requires `dataframe` key, '
