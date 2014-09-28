@@ -7,6 +7,15 @@ datasets](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame
 by rendering an [expression graph](https://code.google.com/p/pydot/), show your
 friends or serialise it for later.
 
+## Contents
+
+ - [Usage](#usage)
+  - [Starting out](#starting-out)
+  - [Less verbosity](#less-verbosity)
+  - [Involving pandas](#involving-pandas)
+ - [Known issues](#known-issues)
+ - [Also](#also)
+
 ### Usage
 
 Examples follow using the Python interactive shell
@@ -102,10 +111,13 @@ Create some stupid datasets
 3  4  4
 ```
 
-Create the expression object
+Create the expression object, the `DataFrameExpression` object (aliased here as
+`D`) takes an optional argument `name` which will be used as a label if
+present, otherwise an automatically generated label will applied.
 
 ```python
->>> expr = E('*', [N(3), E('+', [D(dataframe_A), D(dataframe_B)])])
+>>> expr = E('*', [N(3), E('+', [D(dataframe_A, 'dataframe A'),
+...                              D(dataframe_B, 'dataframe B')])])
 >>> expr.graph().write_png('dataframe.png')
 True
 >>> expr.resolve()
