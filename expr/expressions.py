@@ -1,3 +1,5 @@
+import __builtin__
+import importlib
 import sys
 
 import pandas
@@ -98,12 +100,12 @@ class Expr(ExprBase):
             params['arguments'] = deserialised_args
             return cls(**params)
         except KeyError:
-            raise MalformedExpr('Expr object requires `operation_name` and '
-                                '`arguments` please pass them')
+            fmt_str = "{0} requires `operation_name` and `arguments`"
+            raise MalformedExpr(fmt_str.format(cls.__name__))
 
-    def resolve(self):
+    def resolve(self, **kwargs):
         resolved_arguments = [arg.resolve() for arg in self.arguments]
-        return self.operation(*resolved_arguments)
+        return self.operation(*resolved_arguments, **kwargs)
 
     def graph(self, name=None, graph=None, parent=None):
         """
@@ -163,15 +165,10 @@ class NumExpr(ExprBase):
 class DataFrameExpr(ExprBase):
     __type__ = 'DataFrameExpr'
     serialisable_attrs = ('__type__', 'dataframe')
-    node_opts = {
-        'shape': 'box',
-        'fontsize': '10',
-        'fontname': 'Courier',
-        'colour': '#FFDC00',  # Yellow
-    }
+    node_opts = {'colour': '#FFDC00'}  # Yellow
 
     def __init__(self, dataframe, name='auto', **kwargs):
-        if not isinstance(dataframe, pandas.DataFrame):
+        if not isinstance(dataframe, (pandas.DataFrame, pandas.Series)):
             messg = 'DataFrameExpr must be instantiated with a `DataFrame`.'
             raise MalformedExpr(messg)
         self.dataframe = dataframe
@@ -183,8 +180,7 @@ class DataFrameExpr(ExprBase):
             name = "df@{0}".format(hex(id(self.dataframe)))
         else:
             name = self.name
-        df_head = self.dataframe.head(2).to_string().encode('utf-8')
-        return "{0}\n{1}".format(name, df_head)
+        return "{0}\n{1}".format(name, self.dataframe.shape)
 
     def to_dict(self):
         return {
@@ -207,9 +203,63 @@ class DataFrameExpr(ExprBase):
     def resolve(self):
         return self.dataframe
 
+
+class FuncExpr(Expr):
+    __type__ = 'FuncExpr'
+    node_opts = {
+        'colour': '#F012BE',  # Fuchsia
+        'fontname': 'Courier',
+        'fontsize': '10',
+    }
+
+    def __init__(self, operation_name, arguments, **kwargs):
+        dots = operation_name.split('.')
+        name, dotted_path = dots[0], dots[1:]
+        if dotted_path:
+            module = importlib.import_module(name)
+            self.operation = reduce(getattr, dotted_path, module)
+        else:
+            self.operation = getattr(__builtin__, name)
+        self.operation_name = operation_name
+        self.base_name = name
+        self.dotted_path = dotted_path
+        self.arguments = arguments
+        self.kwargs = kwargs
+
+    @property
+    def node_name(self):
+        if len(self.dotted_path) > 1:
+            return "{0}...{1}".format(self.base_name, self.dotted_path[-1])
+        elif len(self.dotted_path) == 1:
+            return self.operation_name
+        return self.base_name
+
+    def resolve(self):
+        try:
+            return super(FuncExpr, self).resolve(**self.kwargs)
+        except TypeError:
+            resolved_arguments = [arg.resolve() for arg in self.arguments]
+            return self.operation(resolved_arguments, **self.kwargs)
+
+    def graph(self, *args, **kwargs):
+        graph = super(FuncExpr, self).graph(*args, **kwargs)
+        kwargs_fmt = ["{0}={1}".format(k, v) for k, v in self.kwargs.iteritems()]
+        kwargs_node = pydot.Node('\n'.join(kwargs_fmt),
+                                 style='filled',
+                                 **_colour({
+                                     "colour": "#01FF70",  # Lime
+                                     "fontname": "Courier",
+                                     "fontsize": 9,
+                                     }))
+        graph.add_node(kwargs_node)
+        graph.add_edge(pydot.Edge(kwargs_node, self.node))
+        return graph
+
+
 __all__ = (
     'expression_from_dict',
     'Expr',
     'NumExpr',
-    'DataFrameExpr'
+    'DataFrameExpr',
+    'FuncExpr'
 )
