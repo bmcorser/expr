@@ -39,6 +39,7 @@ setup_kwargs = {
     'install_requires': ['pydot'],
     'version': dunder('__version__'),
     'tests_require': ['pytest'],
+    'description': 'Draw little expression graphs; made to be hacked on.',
     'long_description': open('README.rst', 'r').read(),
     'cmdclass': {
         'test': pytest_,
