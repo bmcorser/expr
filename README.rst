@@ -18,6 +18,7 @@ Contents
     * `Starting out`_
     * `Less verbosity`_
     * `Getting pandas involved`_
+    * `Serialising`_
 
 - `Known issues`_
 - `Also`_
@@ -147,6 +148,70 @@ present, otherwise an automatically generated label will applied.
 
 .. figure:: https://raw.githubusercontent.com/bmcorser/expr/master/dataframe.png
    :alt: dataframe
+
+Serialising
+~~~~~~~~~~~
+
+Let's serialise the above example using JSON, any arguments passed to the
+``serialise`` method are used when the serialiser function is applied.
+
+.. code:: python
+
+    >>> import json
+    >>> print(expr.serialise(json.dumps, indent=4))
+    {
+        "__type__": "Expr",
+        "operation_name": "*",
+        "arguments": [
+            {
+                "__type__": "NumExpr",
+                "number": 3.0
+            },
+            {
+                "__type__": "Expr",
+                "operation_name": "+",
+                "arguments": [
+                    {
+                        "__type__": "DataFrameExpr",
+                        "name": "A",
+                        "dataframe": {
+                            "a": {
+                                "0": 1,
+                                "1": 2,
+                                "2": 3,
+                                "3": 4
+                            },
+                            "b": {
+                                "0": 1,
+                                "1": 2,
+                                "2": 3,
+                                "3": 4
+                            }
+                        }
+                    },
+                    {
+                        "__type__": "DataFrameExpr",
+                        "name": "B",
+                        "dataframe": {
+                            "a": {
+                                "0": 1,
+                                "1": 2,
+                                "2": 3,
+                                "3": 4
+                            },
+                            "b": {
+                                "0": 1,
+                                "1": 2,
+                                "2": 3,
+                                "3": 4
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+
 
 Known Issues
 ~~~~~~~~~~~~

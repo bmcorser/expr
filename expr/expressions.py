@@ -1,5 +1,4 @@
 import sys
-import uuid
 
 import pandas
 import pydot
@@ -18,8 +17,8 @@ def expression_from_dict(dict_):
     try:
         class_name = dict_['__type__']
     except KeyError:
-        raise MalformedExpr('I need a `__type__` key to know '
-                                           'which class to instantiate.')
+        raise MalformedExpr('I need a `__type__` key to know which class to '
+                            'instantiate.')
     expression_class = getattr(sys.modules[__name__], class_name)
     return expression_class.from_dict(dict_)
 
@@ -42,8 +41,8 @@ class ExprBase(object):
                 raise exc('Class {} requires argument {}'.format(cls_, attr))
         return cls(**attrs)
 
-    def serialise(self, serialiser):
-        return serialiser(self.to_dict())
+    def serialise(self, serialiser, **kwargs):
+        return serialiser(self.to_dict(), **kwargs)
 
     def resolve(self, *args, **kwargs):
         raise NotImplementedError("Should have implemented `resolve` method")
@@ -99,9 +98,8 @@ class Expr(ExprBase):
             params['arguments'] = deserialised_args
             return cls(**params)
         except KeyError:
-            raise MalformedExpr('Expr object requires '
-                                               '`operation_name` and '
-                                               '`arguments` please pass them')
+            raise MalformedExpr('Expr object requires `operation_name` and '
+                                '`arguments` please pass them')
 
     def resolve(self):
         resolved_arguments = [arg.resolve() for arg in self.arguments]
@@ -117,9 +115,10 @@ class Expr(ExprBase):
         Example:
 
         >>> two = NumExpr(2)
-        >>> expression = Expr(operation='+', arguments=[two, two])
-        >>> graph = expression.graph('Two and two')
-        >>> graph.write_png('two-and-two.png')
+        >>> three = NumExpr(3)
+        >>> expression = Expr(operation='+', arguments=[two, three])
+        >>> graph = expression.graph('Two and three')
+        >>> graph.write_png('two-and-three.png')
         True
         """
         if not graph:
@@ -168,7 +167,7 @@ class DataFrameExpr(ExprBase):
 
     def __init__(self, dataframe, name='auto', **kwargs):
         if not isinstance(dataframe, pandas.DataFrame):
-            messg = 'DataFrameExpr must be instantiated with a `DataFrame`.'  # NOQA
+            messg = 'DataFrameExpr must be instantiated with a `DataFrame`.'
             raise MalformedExpr(messg)
         self.dataframe = dataframe
         self.name = name
@@ -194,9 +193,8 @@ class DataFrameExpr(ExprBase):
             })
             return cls(**dict_)
         except KeyError:
-            raise MalformedExpr('DataFrameExpr object '
-                                               'requires `dataframe` key, '
-                                               'please pass it.')
+            raise MalformedExpr('DataFrameExpr object requires `dataframe` '
+                                'key, please pass it.')
 
     def resolve(self):
         return self.dataframe

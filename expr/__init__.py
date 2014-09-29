@@ -1,3 +1,3 @@
-__version__ = '0.0.1f'
+__version__ = '0.0.1g'
 
 from .expressions import *
