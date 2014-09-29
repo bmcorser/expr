@@ -33,8 +33,8 @@ def dunder(name):
 setup_kwargs = {
     'author': 'bmcorser',
     'author_email': 'bmcorser@gmail.com',
-    'url': 'https://github.com/bmcorser/expr-graph',
-    'name': 'expr-graph',
+    'url': 'https://github.com/bmcorser/expr',
+    'name': 'expr',
     'packages': ['expr'],
     'install_requires': ['pydot'],
     'version': dunder('__version__'),

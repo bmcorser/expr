@@ -1,8 +1,8 @@
-expr-graph
+expr
 ==========
 
-.. figure:: https://raw.githubusercontent.com/bmcorser/expr-graph/master/expr-graph.png
-   :alt: expr-graph
+.. figure:: https://raw.githubusercontent.com/bmcorser/expr/master/expr.png
+   :alt: expr
 
 Create simple visualisations of mathematical operations on `small datasets`_
 by rendering an `expression graph`_, show your friends or serialise it for later.
@@ -69,7 +69,7 @@ Draw a graph
 
 ``example.png``
 
-.. figure:: https://raw.githubusercontent.com/bmcorser/expr-graph/master/example.png
+.. figure:: https://raw.githubusercontent.com/bmcorser/expr/master/example.png
    :alt: example
 
 
@@ -91,7 +91,7 @@ characters away
 
 ``pi.png``
 
-.. figure:: https://raw.githubusercontent.com/bmcorser/expr-graph/master/pi.png
+.. figure:: https://raw.githubusercontent.com/bmcorser/expr/master/pi.png
    :alt: pi
 
 
@@ -144,7 +144,7 @@ present, otherwise an automatically generated label will applied.
 
 ``dataframe.png``
 
-.. figure:: https://raw.githubusercontent.com/bmcorser/expr-graph/master/dataframe.png
+.. figure:: https://raw.githubusercontent.com/bmcorser/expr/master/dataframe.png
    :alt: dataframe
 
 Known Issues
