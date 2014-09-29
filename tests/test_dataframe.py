@@ -38,5 +38,5 @@ resolved = expr.resolve()
 def test_dataframe_numeric():
     print('')
     print(expr.resolve())
-    expr.graph()
+    expr.graph().write_png('expr.png')
     expr.serialise(json.dumps)

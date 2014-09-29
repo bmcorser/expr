@@ -70,7 +70,7 @@ class Expr(ExprBase):
     __type__ = 'Expr'
     serialisable_attrs = ('__type__', 'operation_name', 'arguments')
     node_opts = {
-        'fontcolour': '#DDDDDD',  # Silver
+        'fontcolour': '#FFFFFF',  # White
         'fontsize': '17.0',
         'fontname': 'Helvetica',
         'fixedsize': 'true',

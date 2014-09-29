@@ -104,6 +104,7 @@ We can create expressions that involve more than just numbers ...
 
 .. code:: python
 
+    >>> import pandas
     >>> from expr import (
     ...     Expr as E,
     ...     NumExpr as N,
