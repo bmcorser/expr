@@ -163,7 +163,12 @@ class NumExpr(ExprBase):
 class DataFrameExpr(ExprBase):
     __type__ = 'DataFrameExpr'
     serialisable_attrs = ('__type__', 'dataframe')
-    node_opts = {'colour': '#FFDC00'}  # Yellow
+    node_opts = {
+        'shape': 'box',
+        'fontsize': '10',
+        'fontname': 'Courier',
+        'colour': '#FFDC00',  # Yellow
+    }
 
     def __init__(self, dataframe, name='auto', **kwargs):
         if not isinstance(dataframe, pandas.DataFrame):
@@ -175,8 +180,11 @@ class DataFrameExpr(ExprBase):
     @property
     def node_name(self):
         if self.name is 'auto':
-            return "df@{0}".format(hex(id(self.dataframe)))
-        return self.name
+            name = "df@{0}".format(hex(id(self.dataframe)))
+        else:
+            name = self.name
+        df_head = self.dataframe.head(2).to_string().encode('utf-8')
+        return "{0}\n{1}".format(name, df_head)
 
     def to_dict(self):
         return {
