@@ -17,7 +17,7 @@ Contents
 
     * `Starting out`_
     * `Less verbosity`_
-    * `Getting pandas involved`_
+    * `Involving pandas`_
     * `Serialising`_
 
 - `Known issues`_
@@ -97,8 +97,8 @@ characters away
    :alt: pi
 
 
-Getting pandas involved
-^^^^^^^^^^^^^^^^^^^^^^^
+Involving pandas
+^^^^^^^^^^^^^^^^
 
 We can create expressions that involve more than just numbers ...
 
@@ -212,15 +212,88 @@ Let's serialise the above example using JSON, any arguments passed to the
         ]
     }
 
+Getting funccy
+^^^^^^^^^^^^^^
+
+The final expression provided in this package is ``FuncExpr``, which applies
+arbitrary functions to the arguments supplied (which should be objects
+implementing a ``resolve`` method). Keywords are also applied, probably for
+specifying options, which do not have to be expression objects.  A contrived
+example of ``FuncExpr`` use follows.
+
+Do some smart imports
+
+.. code:: python
+
+    import pandas
+    from expr import (
+        Expr as E,
+        NumExpr as N,
+        DataFrameExpr as D,
+        FuncExpr as F,
+    )
+
+Define a factory function for creating ``DataFrame`` objects
+
+.. code:: python
+
+    def x_by_y(x, y, columns=False):
+        data = [[a + b for b in range(x)] for a in range(y)]
+        if columns is False:
+            columns = [chr(97 + c) for c in range(x)]
+        return pandas.DataFrame.from_records(data=data, columns=columns)
+
+Crank out some df's for later use
+
+.. code:: python
+
+    df_A = x_by_y(3, 4)
+    df_B = x_by_y(3, 4)
+    df_C = x_by_y(3, 4)
+
+Now set up out expression and look at its graph
+
+.. code:: python
+
+    expr = E('+',
+        [
+            E('*',
+                [
+                    N(3),
+                    F('pandas.concat',
+                        [
+                            D(x_by_y(1, 4, ['a'])),
+                            D(x_by_y(1, 4, ['b'])),
+                            D(x_by_y(1, 4, ['c'])),
+                        ], axis=1
+                    )
+                ]
+            ),
+            D(x_by_y(3, 4))
+        ]
+    )
+    G = expr.graph()
+    G.write_png('func.png')
+
+``func.png``
+
+.. figure:: https://raw.githubusercontent.com/bmcorser/expr/master/func.png
+   :alt: func
+
+Crazy ish
+^^^^^^^^^
+
+Why not very clumsily visualise a call stack for your audience's pleasure?
+
 
 Known Issues
 ~~~~~~~~~~~~
 
-If you like YAML, you may encounter_ some issues_ serialising ``pandas``
-objects, but JSON should be fine.
+If you like YAML, serialising ``pandas`` objects, may_ be problematic_, but
+JSON should be fine.
 
-.. _encounter: http://pyyaml.org/ticket/254
-.. _issues: http://pyyaml.org/ticket/192
+.. _may: http://pyyaml.org/ticket/254
+.. _problematic: http://pyyaml.org/ticket/192
 
 Also
 ~~~~
