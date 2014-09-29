@@ -89,7 +89,6 @@ characters away
     3.142857142857143
     >>> expr.graph().write_png('pi.png')
     True
-    >>> expr.resolve()
 
 ``pi.png``
 
