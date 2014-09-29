@@ -4,7 +4,7 @@ import uuid
 import pandas
 import pydot
 
-from .exceptions import MalformedExpressionException
+from .exceptions import MalformedExpr
 from .operations import OPERATIONS, OP_ALIAS
 
 
@@ -18,13 +18,13 @@ def expression_from_dict(dict_):
     try:
         class_name = dict_['__type__']
     except KeyError:
-        raise MalformedExpressionException('I need a `__type__` key to know '
+        raise MalformedExpr('I need a `__type__` key to know '
                                            'which class to instantiate.')
     expression_class = getattr(sys.modules[__name__], class_name)
     return expression_class.from_dict(dict_)
 
 
-class ExpressionBase(object):
+class ExprBase(object):
     serialisable_attrs = ()
 
     def to_dict(self):
@@ -37,7 +37,7 @@ class ExpressionBase(object):
             try:
                 attrs.update({attr: json_dict[attr]})
             except KeyError:
-                exc = MalformedExpressionException
+                exc = MalformedExpr
                 cls_ = cls.__class__.__name__
                 raise exc('Class {} requires argument {}'.format(cls_, attr))
         return cls(**attrs)
@@ -66,8 +66,8 @@ class ExpressionBase(object):
         raise NotImplementedError("Should have implemented `node_name` property.")  # NOQA
 
 
-class Expression(ExpressionBase):
-    __type__ = 'Expression'
+class Expr(ExprBase):
+    __type__ = 'Expr'
     serialisable_attrs = ('__type__', 'operation_name', 'arguments')
     node_opts = {
         'fontcolour': '#DDDDDD',  # Silver
@@ -83,7 +83,7 @@ class Expression(ExpressionBase):
         self.operation_name = operation_name
         self.operation = OPERATIONS.get(operation_name, False)
         if not self.operation:
-            raise MalformedExpressionException(
+            raise MalformedExpr(
                 "Unsupported operation {}".format(operation_name))
         self.arguments = arguments
 
@@ -99,7 +99,7 @@ class Expression(ExpressionBase):
             params['arguments'] = deserialised_args
             return cls(**params)
         except KeyError:
-            raise MalformedExpressionException('Expression object requires '
+            raise MalformedExpr('Expr object requires '
                                                '`operation_name` and '
                                                '`arguments` please pass them')
 
@@ -116,8 +116,8 @@ class Expression(ExpressionBase):
 
         Example:
 
-        >>> two = NumericExpression(2)
-        >>> expression = Expression(operation='+', arguments=[two, two])
+        >>> two = NumExpr(2)
+        >>> expression = Expr(operation='+', arguments=[two, two])
         >>> graph = expression.graph('Two and two')
         >>> graph.write_png('two-and-two.png')
         True
@@ -140,8 +140,8 @@ class Expression(ExpressionBase):
         }
 
 
-class NumericExpression(ExpressionBase):
-    __type__ = 'NumericExpression'
+class NumExpr(ExprBase):
+    __type__ = 'NumExpr'
     serialisable_attrs = ('__type__', 'number')
     node_opts = {'colour': '#7FDBFF'}  # Aqua
 
@@ -149,8 +149,8 @@ class NumericExpression(ExpressionBase):
         try:
             self.number = float(number)
         except ValueError:
-            messg = 'NumericExpression must be instantiated with a `Number`.'
-            raise MalformedExpressionException(messg)
+            messg = 'NumExpr must be instantiated with a `Number`.'
+            raise MalformedExpr(messg)
 
     @property
     def node_name(self):
@@ -161,15 +161,15 @@ class NumericExpression(ExpressionBase):
         return self.number
 
 
-class DataFrameExpression(ExpressionBase):
-    __type__ = 'DataFrameExpression'
+class DataFrameExpr(ExprBase):
+    __type__ = 'DataFrameExpr'
     serialisable_attrs = ('__type__', 'dataframe')
     node_opts = {'colour': '#FFDC00'}  # Yellow
 
     def __init__(self, dataframe, name='auto', **kwargs):
         if not isinstance(dataframe, pandas.DataFrame):
-            messg = 'DataFrameExpression must be instantiated with a `DataFrame`.'  # NOQA
-            raise MalformedExpressionException(messg)
+            messg = 'DataFrameExpr must be instantiated with a `DataFrame`.'  # NOQA
+            raise MalformedExpr(messg)
         self.dataframe = dataframe
         self.name = name
 
@@ -194,7 +194,7 @@ class DataFrameExpression(ExpressionBase):
             })
             return cls(**dict_)
         except KeyError:
-            raise MalformedExpressionException('DataFrameExpression object '
+            raise MalformedExpr('DataFrameExpr object '
                                                'requires `dataframe` key, '
                                                'please pass it.')
 
@@ -203,7 +203,7 @@ class DataFrameExpression(ExpressionBase):
 
 __all__ = (
     'expression_from_dict',
-    'Expression',
-    'NumericExpression',
-    'DataFrameExpression'
+    'Expr',
+    'NumExpr',
+    'DataFrameExpr'
 )

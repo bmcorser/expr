@@ -32,21 +32,21 @@ Import some things from the module
 
 .. code:: python
 
-    from expr_graph import Expression, NumericExpression
+    from expr import Expr, NumExpr
 
 Construct an expression
 
 .. code:: python
 
-    expr = Expression(
+    expr = Expr(
         operation_name='+',
         arguments=[
-            NumericExpression(number=1),
-            Expression(
+            NumExpr(number=1),
+            Expr(
                 operation_name='/',
                 arguments=[
-                    NumericExpression(number=2),
-                    NumericExpression(number=3),
+                    NumExpr(number=2),
+                    NumExpr(number=3),
                 ]
             )
         ]
@@ -81,7 +81,7 @@ characters away
 
 .. code:: python
 
-    >>> from expr_graph import Expression as E, NumericExpression as N
+    >>> from expr import Expr as E, NumExpr as N
     >>> expr = E('/', [N(22), N(7)])
     >>> expr.resolve()
     3.142857142857143
@@ -102,10 +102,10 @@ We can create expressions that involve more than just numbers ...
 
 .. code:: python
 
-    >>> from expr_graph import (
-    ...     Expression as E,
-    ...     NumericExpression as N,
-    ...     DataFrameExpression as D,
+    >>> from expr import (
+    ...     Expr as E,
+    ...     NumExpr as N,
+    ...     DataFrameExpr as D,
     ... )
 
 Create some stupid datasets
@@ -125,7 +125,7 @@ Create some stupid datasets
     2  3  3
     3  4  4
 
-Create the expression object, the ``DataFrameExpression`` object (aliased here
+Create the expression object, the ``DataFrameExpr`` object (aliased here
 as ``D``) takes an optional argument ``name`` which will be used as a label if
 present, otherwise an automatically generated label will applied.
 

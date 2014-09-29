@@ -1,6 +1,6 @@
-from expr_graph import Expression, NumericExpression
+from expr import Expr, NumExpr
 
-arguments = (NumericExpression(3), NumericExpression(2))
+arguments = (NumExpr(3), NumExpr(2))
 operation_expected = (('*', 6),
                       ('+', 5),
                       ('/', 1.5),
@@ -10,4 +10,4 @@ operation_expected = (('*', 6),
 
 def test_operations():
     for operation, expected in operation_expected:
-        assert Expression(operation, arguments).resolve() == expected
+        assert Expr(operation, arguments).resolve() == expected

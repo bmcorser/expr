@@ -1,7 +1,7 @@
 import json
 import random
 import pandas
-from expr_graph import Expression, NumericExpression, DataFrameExpression
+from expr import Expr, NumExpr, DataFrameExpr
 
 dataframe_flat = lambda: (
     # index
@@ -15,22 +15,22 @@ index, data, columns = dataframe_flat()
 dataframe0 = pandas.DataFrame.from_records(index=index, data=data, columns=columns)
 index, data, columns = dataframe_flat()
 dataframe1 = pandas.DataFrame.from_records(index=index, data=data, columns=columns)
-expr = Expression('*',
+expr = Expr('*',
     [
-        Expression('-',
+        Expr('-',
             [
-                DataFrameExpression(dataframe0),
-                Expression('+',
+                DataFrameExpr(dataframe0),
+                Expr('+',
                     [
-                        NumericExpression(32),
-                        DataFrameExpression(dataframe1),
+                        NumExpr(32),
+                        DataFrameExpr(dataframe1),
                     ]
                 )
             ]
         ),
-        Expression(operation_name='/',
-                   arguments=[NumericExpression(number=22),
-                              NumericExpression(number=7)])
+        Expr(operation_name='/',
+                   arguments=[NumExpr(number=22),
+                              NumExpr(number=7)])
     ]
 )
 resolved = expr.resolve()

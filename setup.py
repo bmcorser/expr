@@ -25,7 +25,7 @@ class pytest_(test):
 
 
 def dunder(name):
-    path_components = os.path.dirname(__file__), 'expr_graph', '__init__.py'
+    path_components = os.path.dirname(__file__), 'expr', '__init__.py'
     with open(os.path.join(*path_components)) as initpy:
         return (re.compile(r".*{0} = '(.*?)'".format(name), re.S)
                   .match(initpy.read()).group(1))
@@ -35,7 +35,7 @@ setup_kwargs = {
     'author_email': 'bmcorser@gmail.com',
     'url': 'https://github.com/bmcorser/expr-graph',
     'name': 'expr-graph',
-    'packages': ['expr_graph'],
+    'packages': ['expr'],
     'install_requires': ['pydot'],
     'version': dunder('__version__'),
     'tests_require': ['pytest'],
