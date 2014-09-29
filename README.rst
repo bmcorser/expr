@@ -13,12 +13,14 @@ by rendering an `expression graph`_, show your friends or serialise it for later
 Contents
 --------
 
--  `Usage`_
--  `Starting out`_
--  `Less verbosity`_
--  `Getting pandas involved`_
--  `Known issues`_
--  `Also`_
+- `Usage`_
+
+    * `Starting out`_
+    * `Less verbosity`_
+    * `Getting pandas involved`_
+
+- `Known issues`_
+- `Also`_
 
 Usage
 ~~~~~
@@ -151,7 +153,7 @@ Known Issues
 ~~~~~~~~~~~~
 
 If you like YAML, you may encounter_ some issues_ serialising ``pandas``
-objects.
+objects, but JSON should be fine.
 
 .. _encounter: http://pyyaml.org/ticket/254
 .. _issues: http://pyyaml.org/ticket/192
