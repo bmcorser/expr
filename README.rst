@@ -133,8 +133,7 @@ present, otherwise an automatically generated label will applied.
 
 .. code:: python
 
-    >>> expr = E('*', [N(3), E('+', [D(df_A, 'dataframe A'),
-    ...                              D(df_B, 'dataframe B')])])
+    >>> expr = E('*', [N(3), E('+', [D(df_A, 'A'), D(df_B, 'B')])])
     >>> expr.graph().write_png('dataframe.png')
     True
     >>> expr.resolve()

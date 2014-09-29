@@ -177,7 +177,7 @@ class DataFrameExpr(ExprBase):
     def node_name(self):
         if self.name is 'auto':
             return "df@{0}".format(hex(id(self.dataframe)))
-        return repr(self.name)
+        return self.name
 
     def to_dict(self):
         return {
