@@ -118,9 +118,9 @@ Create some stupid datasets
     ...     data = [(n + 1, n + 1) for n in range(4)]
     ...     return pandas.DataFrame.from_records(data=data, columns=['a', 'b'])
 
-    >>> dataframe_A = two_by_four()
-    >>> dataframe_B = two_by_four()
-    >>> dataframe_A
+    >>> df_A = two_by_four()
+    >>> df_B = two_by_four()
+    >>> df_A
        a  b
     0  1  1
     1  2  2
@@ -133,8 +133,8 @@ present, otherwise an automatically generated label will applied.
 
 .. code:: python
 
-    >>> expr = E('*', [N(3), E('+', [D(dataframe_A, 'dataframe A'),
-    ...                              D(dataframe_B, 'dataframe B')])])
+    >>> expr = E('*', [N(3), E('+', [D(df_A, 'dataframe A'),
+    ...                              D(df_B, 'dataframe B')])])
     >>> expr.graph().write_png('dataframe.png')
     True
     >>> expr.resolve()
