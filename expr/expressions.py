@@ -4,9 +4,10 @@ import sys
 
 import pandas
 import pydot
+import fn
 
-from .exceptions import MalformedExpr
-from .operations import OPERATIONS, OP_ALIAS
+import exceptions as exc
+import operations as op
 
 
 def _colour(dict_):
@@ -19,14 +20,24 @@ def expression_from_dict(dict_):
     try:
         class_name = dict_['__type__']
     except KeyError:
-        raise MalformedExpr('I need a `__type__` key to know which class to '
-                            'instantiate.')
+        raise exc.Malformed('I need a `__type__` key to know which class '
+                                'to instantiate.')
     expression_class = getattr(sys.modules[__name__], class_name)
     return expression_class.from_dict(dict_)
 
 
 class ExprBase(object):
     serialisable_attrs = ()
+
+    def __eq__(self, other):
+        if not self.serialisable_attrs:
+            msg = 'Cannot test equality without `serialisable_attrs` attribute'
+            raise NotImplementedError(msg)
+        shared_attr = lambda attr: getattr(self, attr) == getattr(other, attr)
+        try:
+            return all([shared_attr(attr) for attr in self.serialisable_attrs])
+        except AttributeError:
+            return False
 
     def to_dict(self):
         return {attr: getattr(self, attr) for attr in self.serialisable_attrs}
@@ -38,7 +49,7 @@ class ExprBase(object):
             try:
                 attrs.update({attr: json_dict[attr]})
             except KeyError:
-                exc = MalformedExpr
+                exc = Malformed
                 cls_ = cls.__class__.__name__
                 raise exc('Class {} requires argument {}'.format(cls_, attr))
         return cls(**attrs)
@@ -82,15 +93,15 @@ class Expr(ExprBase):
 
     def __init__(self, operation_name, arguments, **kwargs):
         self.operation_name = operation_name
-        self.operation = OPERATIONS.get(operation_name, False)
+        self.operation = op.OPERATIONS.get(operation_name, False)
         if not self.operation:
-            raise MalformedExpr(
+            raise Malformed(
                 "Unsupported operation {}".format(operation_name))
         self.arguments = arguments
 
     @property
     def node_name(self):
-        return OP_ALIAS.get(self.operation_name, self.operation_name)
+        return op.OP_ALIAS.get(self.operation_name, self.operation_name)
 
     @classmethod
     def from_dict(cls, dict_):
@@ -101,28 +112,13 @@ class Expr(ExprBase):
             return cls(**params)
         except KeyError:
             fmt_str = "{0} requires `operation_name` and `arguments`"
-            raise MalformedExpr(fmt_str.format(cls.__name__))
+            raise Malformed(fmt_str.format(cls.__name__))
 
     def resolve(self, **kwargs):
         resolved_arguments = [arg.resolve() for arg in self.arguments]
         return self.operation(*resolved_arguments, **kwargs)
 
     def graph(self, name=None, graph=None, parent=None):
-        """
-        Build a graph of this expression, return `pydot.Dot` object.
-        Reference for colours is at http://clrs.cc/
-        To render a PNG image of the graph returned, simply call the
-        `.write_png` method with the filename you with to write to.
-
-        Example:
-
-        >>> two = NumExpr(2)
-        >>> three = NumExpr(3)
-        >>> expression = Expr(operation='+', arguments=[two, three])
-        >>> graph = expression.graph('Two and three')
-        >>> graph.write_png('two-and-three.png')
-        True
-        """
         if not graph:
             graph = pydot.Dot(label=name, graph_type='digraph')
         graph.add_node(self.node)
@@ -133,11 +129,10 @@ class Expr(ExprBase):
         return graph
 
     def to_dict(self):
-        args_as_dicts = map(lambda arg: arg.to_dict(), self.arguments)
         return {
             '__type__': self.__type__,
             'operation_name': self.operation_name,
-            'arguments': args_as_dicts
+            'arguments': map(lambda arg: arg.to_dict(), self.arguments),
         }
 
 
@@ -151,7 +146,7 @@ class NumExpr(ExprBase):
             self.number = float(number)
         except ValueError:
             messg = 'NumExpr must be instantiated with a `Number`.'
-            raise MalformedExpr(messg)
+            raise Malformed(messg)
 
     @property
     def node_name(self):
@@ -170,7 +165,7 @@ class DataFrameExpr(ExprBase):
     def __init__(self, dataframe, name='auto', **kwargs):
         if not isinstance(dataframe, (pandas.DataFrame, pandas.Series)):
             messg = 'DataFrameExpr must be instantiated with a `DataFrame`.'
-            raise MalformedExpr(messg)
+            raise Malformed(messg)
         self.dataframe = dataframe
         self.name = name
 
@@ -197,7 +192,7 @@ class DataFrameExpr(ExprBase):
             })
             return cls(**dict_)
         except KeyError:
-            raise MalformedExpr('DataFrameExpr object requires `dataframe` '
+            raise Malformed('DataFrameExpr object requires `dataframe` '
                                 'key, please pass it.')
 
     def resolve(self):
@@ -241,9 +236,8 @@ class FuncExpr(Expr):
             resolved_arguments = [arg.resolve() for arg in self.arguments]
             return self.operation(resolved_arguments, **self.kwargs)
 
-    def graph(self, *args, **kwargs):
-        graph = super(FuncExpr, self).graph(*args, **kwargs)
-        kwargs_fmt = ["{0}={1}".format(k, v) for k, v in self.kwargs.iteritems()]
+    def _kwargs_node(self, graph, kwargs):
+        kwargs_fmt = ["{0}={1}".format(k, v) for k, v in self.kwargs.items()]
         kwargs_node = pydot.Node('\n'.join(kwargs_fmt),
                                  style='filled',
                                  **_colour({
@@ -252,7 +246,12 @@ class FuncExpr(Expr):
                                      "fontsize": 9,
                                      }))
         graph.add_node(kwargs_node)
-        graph.add_edge(pydot.Edge(kwargs_node, self.node))
+        graph.add_edge(pydot.Edge(kwargs_node, self.node, style='dashed'))
+
+    def graph(self, *args, **kwargs):
+        graph = super(FuncExpr, self).graph(*args, **kwargs)
+        if kwargs:
+            self._kwargs_node(graph, kwargs)
         return graph
 
 

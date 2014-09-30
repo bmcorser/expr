@@ -1,2 +1,2 @@
-class MalformedExpr(Exception):
+class Malformed(Exception):
     pass

@@ -80,7 +80,9 @@ Less verbosity
 ^^^^^^^^^^^^^^
 
 Import things using ``as`` to save your typing fingers by aliasing those
-characters away
+characters away. In Python we don't really need to care if functions specify
+keyword or positional signatures, so let's not bother with those wordy
+keywords, hey.
 
 .. code:: python
 
